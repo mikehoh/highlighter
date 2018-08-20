@@ -1,0 +1,14 @@
+<h2>Choose a color and highlight your text</h2>
+
+<app-toolbar [(activeColor)]="activeColor"></app-toolbar>
+
+<div
+  #input
+  class="input"
+  contenteditable="true"
+  [innerHTML]="text"
+  (keyup)="onKeyUp($event)"
+  (click)="onFocus($event)"
+  (blur)="onBlur($event)"
+  (mouseup)="onMouseUp($event)">
+</div>

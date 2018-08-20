@@ -1,0 +1,20 @@
+.container {
+  width: 80%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 15px;
+
+  section {
+    & + section {
+      margin-top: 40px;
+    }
+  }
+
+  h1 {
+    color: black;
+    em {
+      font-style: normal;
+      background-color: yellow;
+    }
+  }
+}

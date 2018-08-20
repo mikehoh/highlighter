@@ -1,0 +1,25 @@
+.input {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  outline: none;
+  min-height: 108px;
+  margin-top: 10px;
+
+  p {
+    margin: 0;
+  }
+  .yellow {
+    background-color: yellow;
+  }
+  .green {
+    background-color: green;
+  }
+  .red {
+    background-color: red;
+  }
+}
+
+h2 {
+  font-size: 20px;
+  color: darkgrey;
+}

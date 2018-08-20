@@ -1,0 +1,16 @@
+<div *ngIf="selectionsData.length">
+  <h2>Filter your highlighted text</h2>
+
+  <div class="filter-toolbar">
+    <button
+      class="btn-all"
+      [ngClass]="{active: !activeColor}"
+      (click)="activeColor = null">All</button>
+    <app-toolbar [(activeColor)]="activeColor"></app-toolbar>
+  </div>
+
+  <div
+    *ngFor="let item of selectionsData | filterSelections:'color':activeColor" class="filter-item">
+    <span [ngClass]="item.color">{{ item.text }}</span>
+  </div>
+</div>

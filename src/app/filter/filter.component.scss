@@ -1,0 +1,41 @@
+.filter-item {
+  margin: 10px 0;
+
+  & + .filter-item {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+  }
+
+  .yellow {
+    background-color: yellow;
+  }
+  .green {
+    background-color: green;
+  }
+  .red {
+    background-color: red;
+  }
+}
+
+h2 {
+  font-size: 20px;
+  color: darkgrey;
+}
+
+.btn-all {
+  display: inline-block;
+  width: 40px;
+  height: 30px;
+  border-radius: 4px;
+  outline: none;
+  border: 2px solid transparent;
+  background-color: gainsboro;
+  color: black;
+  vertical-align: top;
+  cursor: pointer;
+
+  &.active {
+    border-color: darkgrey;
+    box-shadow: inset 0 0 0 1px white;
+  }
+}
