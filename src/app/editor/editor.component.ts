@@ -33,7 +33,7 @@ export class EditorComponent implements OnInit {
     document.execCommand('defaultParagraphSeparator', false, 'p');
   }
 
-  onMouseUp(): void {
+  onMouseUp(event): void {
     if (window.getSelection().toString().trim().length === 0) {
       return;
     }
