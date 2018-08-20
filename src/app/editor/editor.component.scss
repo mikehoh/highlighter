@@ -5,6 +5,17 @@
   min-height: 108px;
   margin-top: 10px;
 
+  &.yellow::selection {
+    background: yellow;
+  }
+  &.green::selection {
+    background: green;
+    color: white;
+  }
+  &.red::selection {
+    background: red;
+  }
+
   p {
     margin: 0;
   }

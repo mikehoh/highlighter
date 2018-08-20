@@ -5,44 +5,71 @@ import { Subject } from 'rxjs/Subject';
 import { ISelection } from './selection.interface';
 import { IRange } from './range.interface';
 
+// Selections Service is the heart of the application.
+// It stores all information about selections.
+// It gets, checks and makes updates in selections storage
+// Filter component gets actual state of data from here
 @Injectable()
 export class SelectionsService {
 
+  // Changes subject, Filter component subscribed on this changes.
   selectionsChanged = new Subject<ISelection[]>();
+
+  // Main storage of all created selections
   private selections: ISelection[] = [];
+
+  // Storage for current new selection. It could be changed while checking, so it should be
+  // available from all service methods.
   private newSelection: ISelection;
+
+  // Stores actions history. Uses to make correct selections merge.
   private actionsQueue: string[] = [];
 
+  // Returns current state of selections
   getList(): ISelection[] {
     return this.selections.map(item => ({...item}));
   }
 
+  // Receives new selection data and transfers it to checking.
   add(selection: ISelection): void {
     this.recalculateIntersections(selection);
   }
 
+  // Receives new text data and transfers to checking existing selections.
   updateSelections(selection: ISelection): void {
     this.recalculateSelections(selection);
   }
 
+  // Receives data about deleted range.
   updateSelectionsAfterDelete(selection: ISelection): void {
     this.recalculateSelectionsAfterDelete(selection);
   }
 
+  // Removes selection from storage by specified index.
   private removeItem(index: number): void {
     this.selections.splice(index, 1);
   }
 
+  // Appends multiple items to storage.
+  // Uses when we need to split some existing selection by two parts.
+  // ex. another color highlight added in the middle of exisiting selection.
   private appendItems(chunks: ISelection[]): void {
     this.selections = [...this.selections, ...chunks];
   }
 
+  // Append a new highlight to the storage. After that sorts selections to keep them in right
+  // order, like in editor.
+  // At the end it send a message with new storage to subscribed Filter component.
   private appendItem(selection: ISelection): void {
     this.selections = [...this.selections, selection];
     this.selections.sort((a, b) => a.start - b.start);
     this.selectionsChanged.next(this.selections.map(item => ({...item})));
   }
 
+  // With a new selection we have to check if it intersects or not with other existing selections.
+  // If no intersections, it's just add a new selection to the storage
+  // If intersection exist, it gevs control to a method to manage this intersection.
+  // After that it checks if similar selection exists (one covers other).
   private recalculateIntersections(newSelection: ISelection): void {
     this.newSelection = newSelection;
     const selections = [...this.selections];
@@ -68,6 +95,9 @@ export class SelectionsService {
     }
   }
 
+  // Gets existing selection and a new one. Checks if they have intersection.
+  // Contains some conditions to verify intersection position.
+  // Returns object with intersection range.
   private getIntersection(
     selection: ISelection, newSelection: ISelection): IRange {
     const minSelection = (selection.start < newSelection.start) ? selection : newSelection;
@@ -92,6 +122,14 @@ export class SelectionsService {
     };
   }
 
+  // Receives selection object, its index in storage and intersection range
+  // With all this information it selects a strategy what to do.
+  // Possible actions:
+  // - Split selection by two
+  // - Cut selection from the left side
+  // - Cut selection from the right side
+  // - Remove selection if it's covered by new a selection
+  // Each strategy calls a method to do that.
   private updateSelection(selection: ISelection, index: number, intersection: IRange): void {
     const ss = selection.start,
           se = selection.end,
@@ -141,6 +179,7 @@ export class SelectionsService {
     }
   }
 
+  // Split selection by two selections
   private splitSelection(selection: ISelection, intersection: IRange): ISelection[] {
     const firstSelection: ISelection = {
       text: selection.text.substring(0, intersection.start - selection.start),
@@ -157,6 +196,7 @@ export class SelectionsService {
     return [firstSelection, secondSelection];
   }
 
+  // Returns selection tail part if head part intersected
   private getSelectionTail(selection: ISelection, intersection: IRange): ISelection {
     return {
       text: selection.text.substring(intersection.end - selection.start + 1, selection.end - selection.start + 1),
@@ -166,6 +206,7 @@ export class SelectionsService {
     };
   }
 
+  // Appends selection on the left side
   private appendSelectionLeft(
     selection: ISelection, newSelection: ISelection, intersection: IRange): ISelection {
     const tail = selection.text.substring(intersection.end - selection.start + 1, selection.end - selection.start + 1);
@@ -177,6 +218,7 @@ export class SelectionsService {
     };
   }
 
+  // Returns selection head part if tail part intersected
   private getSelectionHead(selection: ISelection, intersection: IRange): ISelection {
     return {
       text: selection.text.substring(0, intersection.start - selection.start),
@@ -186,6 +228,7 @@ export class SelectionsService {
     };
   }
 
+  // Appends selection on the right side
   private appendSelectionRight(
     selection: ISelection, newSelection: ISelection, intersection: IRange): ISelection {
     const head = selection.text.substring(0, intersection.start - selection.start);
@@ -197,6 +240,8 @@ export class SelectionsService {
     };
   }
 
+  // Cheks all selections if they are contain others
+  // If it found such cases, it removes unwanted selections
   private mergeSimilarSelections(selections: ISelection[]): ISelection[] {
     const selectionsCopy = [...selections];
     for (let i = 0; i < selectionsCopy.length - 1; i++) {
@@ -216,6 +261,10 @@ export class SelectionsService {
     return selectionsCopy;
   }
 
+  // Checks if new entered text has impact on existing selections.
+  // Handles if a new text added before each selection,
+  // after selection (best case - need to change nothing:),
+  // inside exisitng selection.
   private recalculateSelections(newText: ISelection): void {
     const delta = newText.end - newText.start;
 
@@ -242,6 +291,9 @@ export class SelectionsService {
     this.selectionsChanged.next(this.selections.map(item => ({...item})));
   }
 
+  // Checks if new deleted characters has impact on existing selections.
+  // Handles if characters deleted before each selection,
+  // after selection, selection deleted partially in different places.
   private recalculateSelectionsAfterDelete(deleted: ISelection): void {
     const delta = -1;
 

@@ -5,6 +5,7 @@
 <div
   #input
   class="input"
+  [ngClass]="activeColor"
   contenteditable="true"
   [innerHTML]="text"
   (keyup)="onKeyUp($event)"
